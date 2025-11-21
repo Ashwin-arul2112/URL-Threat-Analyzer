@@ -4,6 +4,9 @@ Smart URL Threat Analyzer
 Smart URL Threat Analyzer is a full-stack malicious URL detection system combining a machine-learning model, feature engineering, live WHOIS/HTTP scanning, and an interactive web dashboard.
 The application is built with Python, Flask, and MongoDB.
 
+Create a folder named data and model
+Inside a data download the dataset from "https://archive.ics.uci.edu/dataset/967/phiusiil+phishing+url+dataset" or your own dataset
+
 Features :
 AI URL Classification
 Extracts lexical, structural, and heuristic URL features
