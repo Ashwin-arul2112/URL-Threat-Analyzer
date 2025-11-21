@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart URL Threat Analyzer</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <style>
+    /* =============== Root Variables =============== */
+    :root {
+      --bg-dark: #0f172a;
+      --bg-card: rgba(30, 41, 59, 0.6);
+      --bg-hover: rgba(51, 65, 85, 0.8);
+      --text-light: #f8fafc;
+      --text-dim: #94a3b8;
+      --accent: #38bdf8;
+      --accent2: #818cf8;
+      --border-glow: 0 0 25px rgba(56, 189, 248, 0.25);
+      --transition-speed: 0.3s;
+    }
+
+    [data-theme="light"] {
+      --bg-dark: #f8fafc;
+      --bg-card: #f1f5f9;
+      --bg-hover: #e2e8f0;
+      --text-light: #0f172a;
+      --text-dim: #475569;
+      --accent: #0284c7;
+      --accent2: #3b82f6;
+    }
+
+    [data-theme="amoled"] {
+      --bg-dark: #000;
+      --bg-card: rgba(25, 25, 25, 0.9);
+      --bg-hover: rgba(40, 40, 40, 1);
+      --text-light: #e5e7eb;
+      --accent: #06b6d4;
+      --accent2: #818cf8;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: radial-gradient(circle at top left, var(--bg-dark), #020617 85%);
+      color: var(--text-light);
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      transition: background var(--transition-speed), color var(--transition-speed);
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    a:hover { color: var(--accent2); }
+
+    /* =============== Navbar =============== */
+    nav {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
+      animation: slideDown 0.5s ease-out;
+    }
+
+    .nav-logo {
+      font-size: 1.6rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      color: transparent;
+      letter-spacing: 0.5px;
+      transition: 0.3s ease;
+      user-select: none;
+    }
+
+    .nav-logo:hover {
+      transform: scale(1.05);
+      text-shadow: 0 0 12px var(--accent);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .nav-links a {
+      font-weight: 500;
+      color: var(--text-light);
+      position: relative;
+      padding-bottom: 3px;
+    }
+
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -3px;
+      width: 0%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width 0.3s ease;
+    }
+
+    .nav-links a:hover::after,
+    .nav-links a.active::after {
+      width: 100%;
+    }
+
+    .nav-links a.active {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Theme & Settings Buttons */
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .theme-toggle, .settings-toggle {
+      cursor: pointer;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 0.5rem 0.7rem;
+      transition: background var(--transition-speed);
+    }
+
+    .theme-toggle:hover, .settings-toggle:hover {
+      background: var(--bg-hover);
+    }
+
+    /* =============== Mobile Menu =============== */
+    .menu-btn {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+    }
+
+    .menu-btn div {
+      width: 26px;
+      height: 3px;
+      background: var(--text-light);
+      border-radius: 2px;
+      transition: 0.3s ease;
+    }
+
+    @media (max-width: 820px) {
+      .nav-links {
+        position: absolute;
+        top: 70px;
+        right: 0;
+        flex-direction: column;
+        background: rgba(15, 23, 42, 0.95);
+        padding: 1.5rem;
+        border-left: 1px solid rgba(255,255,255,0.1);
+        display: none;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .nav-links.active { display: flex; }
+
+      .menu-btn { display: flex; }
+    }
+
+    /* =============== Main Content =============== */
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    /* =============== Footer =============== */
+    footer {
+      background: rgba(15, 23, 42, 0.8);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      text-align: center;
+      padding: 1.3rem;
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      backdrop-filter: blur(12px);
+    }
+
+    footer span { color: var(--accent); font-weight: 600; }
+    footer a { color: var(--accent); font-weight: 500; }
+    footer a:hover { color: var(--accent2); text-decoration: underline; }
+
+    /* =============== Preferences Panel =============== */
+    .preferences-panel {
+      position: fixed;
+      right: -300px;
+      top: 0;
+      height: 100%;
+      width: 300px;
+      background: rgba(15, 23, 42, 0.95);
+      border-left: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(16px);
+      padding: 1.5rem;
+      transition: right 0.3s ease;
+      z-index: 9999;
+    }
+
+    .preferences-panel.active {
+      right: 0;
+    }
+
+    .preferences-panel h3 {
+      margin-bottom: 1rem;
+      color: var(--accent);
+      font-size: 1.2rem;
+    }
+
+    .preferences-panel label {
+      display: block;
+      margin: 0.8rem 0;
+      color: var(--text-light);
+      font-size: 0.95rem;
+    }
+
+    .preferences-panel button {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-light);
+      padding: 0.4rem 0.8rem;
+      margin-right: 0.3rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .preferences-panel button:hover {
+      background: var(--bg-hover);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(56,189,248,0.3);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(56,189,248,0.6);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    body.reduced-motion * {
+      transition: none !important;
+      animation: none !important;
+    }
+
+    table.compact td, table.compact th {
+      padding: 0.4rem 0.6rem !important;
+      font-size: 0.85rem;
+    }
+
+    .highlight-risky tr.risky {
+      background: rgba(239,68,68,0.15);
+      border-left: 3px solid #ef4444;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav>
+    <div class="nav-logo">ThreatAnalyzer</div>
+
+    <div class="menu-btn" id="menuBtn">
+      <div></div><div></div><div></div>
+    </div>
+
+    <div class="nav-links" id="navLinks">
+      <a href="/" class="{{ 'active' if request.path == '/' else '' }}">Home</a>
+      <a href="/dashboard" class="{{ 'active' if '/dashboard' in request.path else '' }}">Dashboard</a>
+      <a href="/batch" class="{{ 'active' if '/batch' in request.path else '' }}">Batch Scan</a>
+      <a href="/live_scans" class="{{ 'active' if '/live_scans' in request.path else '' }}">Live Scans</a>
+    </div>
+
+    <div class="nav-actions">
+      <div class="theme-toggle" id="themeToggle">🌓</div>
+      <div class="settings-toggle" id="settingsToggle">⚙️</div>
+    </div>
+  </nav>
+
+  <!-- Preferences Sidebar -->
+  <div class="preferences-panel" id="preferencesPanel">
+    <h3>User Preferences</h3>
+
+    <label><input type="checkbox" id="compactToggle"> Compact Table View</label>
+    <label><input type="checkbox" id="highlightToggle"> Highlight Risky URLs</label>
+    <label><input type="checkbox" id="motionToggle"> Reduce Animations</label>
+
+    <div style="margin-top:1rem;">
+      <p>Font Size:</p>
+      <button id="fontSmall">A-</button>
+      <button id="fontReset">A</button>
+      <button id="fontLarge">A+</button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2025 <span>Smart URL Threat Analyzer</span> | Built by <a href="#">LOQ</a></p>
+  </footer>
+
+  <!-- JS -->
+  <script>
+    const menuBtn = document.getElementById("menuBtn");
+    const navLinks = document.getElementById("navLinks");
+    const themeBtn = document.getElementById("themeToggle");
+    const settingsBtn = document.getElementById("settingsToggle");
+    const panel = document.getElementById("preferencesPanel");
+    let open = false;
+
+    menuBtn.addEventListener("click", () => {
+      navLinks.classList.toggle("active");
+      const bars = menuBtn.querySelectorAll("div");
+      open = !open;
+      if (open) {
+        bars[0].style.transform = "rotate(45deg) translate(5px, 5px)";
+        bars[1].style.opacity = "0";
+        bars[2].style.transform = "rotate(-45deg) translate(6px, -6px)";
+      } else {
+        bars.forEach(b => { b.style.transform = ""; b.style.opacity = "1"; });
+      }
+    });
+
+    settingsBtn.addEventListener("click", () => {
+      panel.classList.toggle("active");
+    });
+
+    // Theme toggle (dark, light, amoled)
+    themeBtn.addEventListener("click", () => {
+      const current = document.documentElement.getAttribute("data-theme") || "dark";
+      const next = current === "dark" ? "light" : current === "light" ? "amoled" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("theme", next);
+    });
+    document.documentElement.setAttribute("data-theme", localStorage.getItem("theme") || "dark");
+
+    // Preferences Toggles
+    const compactToggle = document.getElementById("compactToggle");
+    const highlightToggle = document.getElementById("highlightToggle");
+    const motionToggle = document.getElementById("motionToggle");
+
+    const stored = {
+      compact: localStorage.getItem("compactView") === "true",
+      highlight: localStorage.getItem("highlightRisky") === "true",
+      motion: localStorage.getItem("reduceMotion") === "true"
+    };
+
+    compactToggle.checked = stored.compact;
+    highlightToggle.checked = stored.highlight;
+    motionToggle.checked = stored.motion;
+
+    if (stored.compact) document.querySelectorAll("table").forEach(t => t.classList.add("compact"));
+    if (stored.highlight) document.body.classList.add("highlight-risky");
+    if (stored.motion) document.body.classList.add("reduced-motion");
+
+    compactToggle.addEventListener("change", e => {
+      document.querySelectorAll("table").forEach(t => t.classList.toggle("compact", e.target.checked));
+      localStorage.setItem("compactView", e.target.checked);
+    });
+    highlightToggle.addEventListener("change", e => {
+      document.body.classList.toggle("highlight-risky", e.target.checked);
+      localStorage.setItem("highlightRisky", e.target.checked);
+    });
+    motionToggle.addEventListener("change", e => {
+      document.body.classList.toggle("reduced-motion", e.target.checked);
+      localStorage.setItem("reduceMotion", e.target.checked);
+    });
+
+    // Font Size Controls
+    let fontSize = parseFloat(localStorage.getItem("fontSize")) || 16;
+    document.body.style.fontSize = fontSize + "px";
+    document.getElementById("fontSmall").onclick = () => adjustFont(-1);
+    document.getElementById("fontLarge").onclick = () => adjustFont(1);
+    document.getElementById("fontReset").onclick = () => adjustFont(0);
+    function adjustFont(change) {
+      if (change === 0) fontSize = 16;
+      else fontSize = Math.min(22, Math.max(12, fontSize + change));
+      document.body.style.fontSize = fontSize + "px";
+      localStorage.setItem("fontSize", fontSize);
+    }
+  </script>
+</body>
+</html>

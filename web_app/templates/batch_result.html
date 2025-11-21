@@ -1,0 +1,299 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="result-container fade-in">
+  <h1 class="title">Batch Scan Results</h1>
+
+  <!-- Summary Cards -->
+  <div class="stats-cards">
+    <div class="card total">
+      <h2>Total URLs</h2>
+      <p>{{ df|length }}</p>
+    </div>
+    <div class="card safe">
+      <h2>Safe</h2>
+      <p>{{ df | selectattr('result', 'equalto', 'safe') | list | length }}</p>
+    </div>
+    <div class="card risky">
+      <h2>Risky</h2>
+      <p>{{ df | selectattr('result', 'equalto', 'risky') | list | length }}</p>
+    </div>
+  </div>
+
+  <!-- Heatmap Visualization -->
+  <div class="heatmap-section">
+    <h2>Risk Score Heatmap</h2>
+    <div class="heatmap">
+      <img src="data:image/png;base64,{{ heatmap_data }}" alt="Score Heatmap">
+    </div>
+  </div>
+
+  <!-- Results Table -->
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>URL</th>
+          <th>Risk Score</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in df %}
+        <tr class="{{ 'risky' if row.result == 'risky' else 'safe' }}">
+          <td>{{ loop.index }}</td>
+          <td class="url">{{ row.url }}</td>
+          <td>
+            <span class="score-pill {{ 'high' if row.score > 0.7 else 'medium' if row.score > 0.3 else 'low' }}">
+              {{ '%.3f'|format(row.score) }}
+            </span>
+          </td>
+          <td class="{{ 'risky' if row.result == 'risky' else 'safe' }}">{{ row.result|capitalize }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="buttons">
+    <a href="/download_batch/csv" class="btn">Download CSV</a>
+    <a href="/download_batch/excel" class="btn secondary">Download Excel</a>
+    <a href="/dashboard" class="btn outline">Back to Dashboard</a>
+  </div>
+</div>
+
+<!-- Styles -->
+<style>
+:root {
+  --accent: #38bdf8;
+  --accent2: #818cf8;
+  --bg-dark: #0f172a;
+  --text-light: #f8fafc;
+  --text-dim: #94a3b8;
+  --safe: #22c55e;
+  --risky: #ef4444;
+}
+
+/* Container */
+.result-container {
+  max-width: 1000px;
+  margin: 3rem auto;
+  background: rgba(30, 41, 59, 0.92);
+  border-radius: 18px;
+  padding: 2.8rem;
+  box-shadow: 0 0 35px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+  animation: fadeIn 0.8s ease;
+}
+
+/* Title */
+.title {
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  color: transparent;
+  margin-bottom: 2rem;
+  position: relative;
+}
+.title::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 6px;
+}
+
+/* Stats Cards */
+.stats-cards {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+.stats-cards .card {
+  flex: 1 1 200px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: inset 0 0 15px rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: all 0.3s ease;
+}
+.stats-cards .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 20px rgba(56,189,248,0.2);
+}
+.card h2 {
+  color: var(--text-dim);
+  font-size: 1rem;
+  margin-bottom: 0.4rem;
+}
+.card p {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+.card.total p { color: var(--accent2); }
+.card.safe p { color: var(--safe); }
+.card.risky p { color: var(--risky); }
+
+/* Heatmap Section */
+.heatmap-section h2 {
+  text-align: center;
+  color: var(--accent);
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+.heatmap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.7);
+  border-radius: 14px;
+  padding: 1.2rem;
+  box-shadow: inset 0 0 20px rgba(56, 189, 248, 0.1);
+  margin-bottom: 2.5rem;
+}
+.heatmap img {
+  width: 100%;
+  max-width: 850px;
+  border-radius: 10px;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+}
+
+/* Table */
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.02);
+  box-shadow: inset 0 0 10px rgba(56,189,248,0.05);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  color: var(--text-light);
+}
+thead {
+  background: rgba(255,255,255,0.08);
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+th, td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.url {
+  word-break: break-word;
+  max-width: 420px;
+  color: #e2e8f0;
+}
+tr:hover {
+  background: rgba(56,189,248,0.08);
+  transition: background 0.2s ease;
+}
+
+/* Score Pill */
+.score-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #fff;
+}
+.score-pill.low {
+  background: rgba(34,197,94,0.25);
+  border: 1px solid #22c55e;
+}
+.score-pill.medium {
+  background: rgba(234,179,8,0.25);
+  border: 1px solid #eab308;
+}
+.score-pill.high {
+  background: rgba(239,68,68,0.25);
+  border: 1px solid #ef4444;
+}
+
+/* Result Colors */
+.safe { color: var(--safe); font-weight: 600; }
+.risky { color: var(--risky); font-weight: 600; }
+
+/* Buttons */
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 2.5rem;
+  gap: 1rem;
+}
+.btn {
+  padding: 0.9rem 1.8rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  text-decoration: none;
+  color: var(--bg-dark);
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transition: all 0.3s ease;
+  text-align: center;
+  min-width: 180px;
+}
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 18px rgba(56,189,248,0.4);
+}
+.btn.secondary {
+  background: linear-gradient(90deg, #818cf8, #38bdf8);
+}
+.btn.outline {
+  background: transparent;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+}
+.btn.outline:hover {
+  background: var(--accent);
+  color: var(--bg-dark);
+}
+
+/* Animations */
+.fade-in {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeIn 0.6s ease forwards;
+}
+@keyframes fadeIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .result-container {
+    padding: 1.8rem;
+  }
+  .title { font-size: 1.8rem; }
+  th, td { padding: 10px; font-size: 0.9rem; }
+  .btn { width: 100%; min-width: unset; }
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".fade-in").forEach((el, i) => {
+    setTimeout(() => el.classList.add("visible"), i * 100);
+  });
+});
+</script>
+
+{% endblock %}

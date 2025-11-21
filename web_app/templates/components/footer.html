@@ -1,0 +1,128 @@
+<footer class="footer">
+  <div class="footer-content">
+    <p>© {{ current_year }} CyberSafe Analytics. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="/">Home</a> |
+      <a href="/dashboard">Dashboard</a> |
+      <a href="/batch_scan">Batch Scan</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  /* 🌙 Footer Styling */
+  .footer {
+    background: rgba(15, 23, 42, 0.95);
+    padding: 1rem 2rem;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    box-shadow: 0 -2px 15px rgba(0, 255, 255, 0.1);
+    position: relative;
+    z-index: 1000;
+  }
+
+  .footer a {
+    color: #38bdf8; /* Cyan accent */
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+
+  .footer a:hover {
+    color: #facc15; /* Gold accent on hover */
+  }
+
+  .footer-links {
+    margin-top: 0.5rem;
+  }
+
+  /* Small responsive tweaks */
+  @media (max-width: 768px) {
+    .footer {
+      font-size: 0.85rem;
+      padding: 1rem;
+    }
+    .footer-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+  }
+</style>
+
+<script>
+  // Optional small animation for footer links
+  document.addEventListener("DOMContentLoaded", () => {
+    const links = document.querySelectorAll('.footer a');
+    links.forEach(link => {
+      link.addEventListener('mouseenter', () => link.style.transform = 'translateY(-2px)');
+      link.addEventListener('mouseleave', () => link.style.transform = 'translateY(0)');
+      link.style.transition = 'transform 0.2s ease';
+    });
+  });
+</script>
+<footer class="footer">
+  <div class="footer-content">
+    <p>© {{ current_year }} CyberSafe Analytics. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="/">Home</a> |
+      <a href="/dashboard">Dashboard</a> |
+      <a href="/batch_scan">Batch Scan</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  /* 🌙 Footer Styling */
+  .footer {
+    background: rgba(15, 23, 42, 0.95);
+    padding: 1rem 2rem;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    box-shadow: 0 -2px 15px rgba(0, 255, 255, 0.1);
+    position: relative;
+    z-index: 1000;
+  }
+
+  .footer a {
+    color: #38bdf8; /* Cyan accent */
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+
+  .footer a:hover {
+    color: #facc15; /* Gold accent on hover */
+  }
+
+  .footer-links {
+    margin-top: 0.5rem;
+  }
+
+  /* Small responsive tweaks */
+  @media (max-width: 768px) {
+    .footer {
+      font-size: 0.85rem;
+      padding: 1rem;
+    }
+    .footer-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+  }
+</style>
+
+<script>
+  // Optional small animation for footer links
+  document.addEventListener("DOMContentLoaded", () => {
+    const links = document.querySelectorAll('.footer a');
+    links.forEach(link => {
+      link.addEventListener('mouseenter', () => link.style.transform = 'translateY(-2px)');
+      link.addEventListener('mouseleave', () => link.style.transform = 'translateY(0)');
+      link.style.transition = 'transform 0.2s ease';
+    });
+  });
+</script>

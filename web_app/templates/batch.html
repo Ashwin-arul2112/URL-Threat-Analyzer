@@ -1,0 +1,288 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="batch-container fade-in">
+  <h1 class="title">Batch URL Scanner</h1>
+
+  <!-- Upload Form -->
+  <form action="/batch" method="POST" enctype="multipart/form-data" id="batchForm">
+    <div class="upload-area" id="uploadArea">
+      <div class="upload-icon">📄</div>
+      <label for="csv_file">
+        <strong>Click to Upload CSV File</strong><br>
+        or drag and drop your file here
+      </label>
+      <input type="file" id="csv_file" name="csv_file" accept=".csv" required>
+    </div>
+
+    <!-- File Preview -->
+    <div class="preview fade-in" id="filePreview" style="display:none;">
+      <p><strong>File Loaded:</strong> <span id="fileName"></span></p>
+      <div class="table-wrapper">
+        <table id="previewTable"></table>
+      </div>
+    </div>
+
+    <!-- Upload Info -->
+    <div id="uploadInfo" class="upload-info" style="display:none;">
+      <p><strong>Detected:</strong> <span id="rowCount">0</span> URLs</p>
+    </div>
+
+    <center>
+      <button type="submit" class="btn-submit" id="submitBtn" disabled>Start Batch Scan</button>
+    </center>
+  </form>
+</div>
+
+<!-- Styles -->
+<style>
+:root {
+  --bg-card: rgba(30, 41, 59, 0.8);
+  --accent: #38bdf8;
+  --accent2: #818cf8;
+  --text-light: #f8fafc;
+  --text-dim: #94a3b8;
+  --bg-dark: #0f172a;
+  --border-glow: 0 0 20px rgba(56,189,248,0.25);
+}
+
+body {
+  background: radial-gradient(circle at top left, #0f172a, #010409);
+  color: var(--text-light);
+  font-family: 'Poppins', sans-serif;
+}
+
+.batch-container {
+  max-width: 720px;
+  margin: 3rem auto;
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  padding: 2.8rem;
+  box-shadow: 0 0 35px rgba(0,0,0,0.5);
+  backdrop-filter: blur(14px);
+  animation: fadeIn 0.8s ease;
+}
+
+.title {
+  text-align: center;
+  font-size: 2.1rem;
+  font-weight: 700;
+  margin-bottom: 2.2rem;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  color: transparent;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 18px rgba(56,189,248,0.25);
+}
+
+/* Upload Area */
+.upload-area {
+  border: 2px dashed var(--accent);
+  border-radius: 14px;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.02);
+  transition: all 0.4s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.upload-area:hover {
+  background: rgba(56,189,248,0.08);
+  transform: scale(1.02);
+  box-shadow: var(--border-glow);
+}
+.upload-area.active {
+  border-color: var(--accent2);
+  background: rgba(56,189,248,0.1);
+  box-shadow: 0 0 30px rgba(129,140,248,0.2);
+}
+.upload-area label {
+  color: var(--text-light);
+  cursor: pointer;
+  font-size: 1.05rem;
+  letter-spacing: 0.3px;
+}
+.upload-area input {
+  display: none;
+}
+.upload-icon {
+  font-size: 2.5rem;
+  color: var(--accent);
+  margin-bottom: 0.8rem;
+  transition: transform 0.4s ease;
+}
+.upload-area:hover .upload-icon {
+  transform: translateY(-3px);
+}
+
+/* Preview Section */
+.preview {
+  margin-top: 2rem;
+  background: rgba(15,23,42,0.7);
+  padding: 1rem 1.2rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: inset 0 0 10px rgba(56,189,248,0.05);
+}
+.preview p {
+  font-size: 0.95rem;
+  color: var(--text-light);
+  margin-bottom: 1rem;
+}
+.table-wrapper {
+  max-height: 240px;
+  overflow-y: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: inset 0 0 12px rgba(56,189,248,0.05);
+}
+.table-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(56,189,248,0.3);
+  border-radius: 6px;
+}
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(56,189,248,0.6);
+}
+.preview table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.preview th, .preview td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.preview th {
+  color: var(--accent);
+  font-weight: 500;
+  text-align: left;
+}
+.preview td {
+  color: var(--text-light);
+  word-break: break-word;
+}
+
+/* Upload Info */
+.upload-info {
+  margin-top: 1rem;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.95rem;
+}
+.upload-info strong {
+  color: var(--accent);
+}
+
+/* Submit Button */
+.btn-submit {
+  margin-top: 2.2rem;
+  padding: 1rem 2.5rem;
+  font-size: 1.05rem;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  color: var(--bg-dark);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 18px rgba(56,189,248,0.25);
+}
+.btn-submit:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 20px rgba(56,189,248,0.4);
+}
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Animation */
+.fade-in {
+  animation: fadeIn 0.6s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .batch-container {
+    padding: 1.8rem;
+  }
+  .title {
+    font-size: 1.8rem;
+  }
+  .btn-submit {
+    width: 100%;
+  }
+}
+</style>
+
+<!-- Script -->
+<script>
+const uploadArea = document.getElementById("uploadArea");
+const fileInput = document.getElementById("csv_file");
+const preview = document.getElementById("filePreview");
+const fileNameSpan = document.getElementById("fileName");
+const previewTable = document.getElementById("previewTable");
+const rowCountEl = document.getElementById("rowCount");
+const uploadInfo = document.getElementById("uploadInfo");
+const submitBtn = document.getElementById("submitBtn");
+
+// Drag-and-drop handlers
+uploadArea.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  uploadArea.classList.add("active");
+});
+uploadArea.addEventListener("dragleave", () => uploadArea.classList.remove("active"));
+uploadArea.addEventListener("drop", (e) => {
+  e.preventDefault();
+  uploadArea.classList.remove("active");
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+});
+
+// Normal upload
+fileInput.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (file) processFile(file);
+});
+
+function processFile(file) {
+  if (!file.name.endsWith(".csv")) {
+    alert("Only CSV files are supported.");
+    return;
+  }
+
+  fileNameSpan.textContent = file.name;
+  preview.style.display = "block";
+  uploadInfo.style.display = "block";
+  submitBtn.disabled = false;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const lines = e.target.result.split("\n").filter(Boolean);
+    const total = lines.length - 1;
+    rowCountEl.textContent = total > 0 ? total : 0;
+
+    let html = "<tr><th>URL</th></tr>";
+    lines.slice(1, 6).forEach(line => {
+      const url = line.split(",")[0]?.trim();
+      if (url) html += `<tr><td>${url}</td></tr>`;
+    });
+
+    if (total > 5) {
+      html += `<tr><td style="color: #94a3b8;">...and ${total - 5} more</td></tr>`;
+    }
+    previewTable.innerHTML = html;
+  };
+  reader.readAsText(file);
+}
+</script>
+{% endblock %}

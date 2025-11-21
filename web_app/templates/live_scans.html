@@ -1,0 +1,234 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="live-container fade-in">
+  <h1 class="page-title">Live Scan Records</h1>
+
+  {% if scans %}
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>URL</th>
+          <th>Final Domain</th>
+          <th>IP Address</th>
+          <th>Response Time (s)</th>
+          <th>Domain Age (days)</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for scan in scans %}
+        <tr class="
+          {% if (scan.response_time_sec and scan.response_time_sec > 2.5) or (scan.domain_age_days is not none and scan.domain_age_days < 60) %}
+            risky
+          {% endif %}
+        ">
+          <td>{{ loop.index }}</td>
+          <td class="url">{{ scan.input_url }}</td>
+          <td>{{ scan.final_domain or 'N/A' }}</td>
+          <td>{{ scan.ip_address or 'N/A' }}</td>
+          <td>{{ '%.3f'|format(scan.response_time_sec or 0) }}</td>
+          <td>{{ scan.domain_age_days if scan.domain_age_days is not none else 'Unknown' }}</td>
+          <td>{{ scan.timestamp.strftime('%Y-%m-%d %H:%M:%S') if scan.timestamp else 'N/A' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="no-data">No live scans recorded yet.</p>
+  {% endif %}
+
+  <div class="actions">
+    <a href="/" class="btn">Run New Live Scan</a>
+    <a href="/dashboard" class="btn outline">Go to Dashboard</a>
+  </div>
+</div>
+
+<!-- Styles -->
+<style>
+:root {
+  --accent: #38bdf8;
+  --accent2: #818cf8;
+  --bg-dark: #0f172a;
+  --text-light: #f8fafc;
+  --text-dim: #94a3b8;
+  --danger: #ef4444;
+  --safe: #22c55e;
+}
+
+.live-container {
+  max-width: 1100px;
+  margin: 3rem auto;
+  background: rgba(30, 41, 59, 0.92);
+  border-radius: 18px;
+  padding: 2.8rem;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(14px);
+  animation: fadeIn 0.8s ease;
+}
+
+.page-title {
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  position: relative;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  color: transparent;
+  letter-spacing: 1px;
+}
+.page-title::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -10px;
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transform: translateX(-50%);
+  border-radius: 10px;
+}
+
+/* Table */
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 0 15px rgba(56, 189, 248, 0.05);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  color: var(--text-light);
+  text-align: left;
+}
+
+thead {
+  background: rgba(56, 189, 248, 0.1);
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+th, td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+.url {
+  max-width: 280px;
+  word-break: break-word;
+  color: var(--accent);
+}
+
+tr:hover {
+  background: rgba(56, 189, 248, 0.08);
+  transition: background 0.2s ease;
+}
+
+tr.risky {
+  background: rgba(239, 68, 68, 0.07);
+  border-left: 3px solid var(--danger);
+  transition: 0.3s ease;
+}
+
+/* Conditional formatting */
+tr.risky td:nth-child(5),
+tr.risky td:nth-child(6) {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* No Data */
+.no-data {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 1rem;
+  margin-top: 2rem;
+  font-style: italic;
+}
+
+/* Buttons */
+.actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 2.8rem;
+  gap: 1rem;
+}
+
+.btn {
+  padding: 1rem 1.8rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  text-decoration: none;
+  color: var(--bg-dark);
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transition: all 0.3s ease;
+  text-align: center;
+  min-width: 180px;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+}
+
+.btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+}
+
+.btn.outline {
+  background: transparent;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  box-shadow: none;
+}
+
+.btn.outline:hover {
+  background: var(--accent);
+  color: var(--bg-dark);
+}
+
+/* Animations */
+.fade-in {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeIn 0.6s ease forwards;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .live-container {
+    padding: 1.8rem;
+  }
+
+  th, td {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  .btn {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .page-title {
+    font-size: 1.7rem;
+  }
+}
+</style>
+{% endblock %}

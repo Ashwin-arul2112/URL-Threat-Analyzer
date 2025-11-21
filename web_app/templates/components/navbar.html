@@ -1,0 +1,107 @@
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="/" class="nav-logo">🛡️ URL Shield</a>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/dashboard">Dashboard</a></li>
+      <li><a href="/batch_scan">Batch Scan</a></li>
+      <li><a href="/api/scan">API Scan</a></li>
+    </ul>
+  </div>
+</nav>
+
+<style>
+  /* 🌌 Navbar Styling */
+  .navbar {
+    background: rgba(15, 23, 42, 0.95);
+    padding: 0.8rem 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+
+  .nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .nav-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #38bdf8;
+    text-decoration: none;
+  }
+
+  .nav-links {
+    list-style: none;
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .nav-links li a {
+    color: #94a3b8;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+
+  .nav-links li a:hover {
+    color: #38bdf8;
+  }
+
+  /* Hamburger for mobile */
+  @media (max-width: 768px) {
+    .nav-links {
+      display: none;
+      flex-direction: column;
+      gap: 1rem;
+      background: rgba(15,23,42,0.95);
+      position: absolute;
+      top: 60px;
+      right: 0;
+      padding: 1rem 2rem;
+      border-radius: 0 0 0.8rem 0.8rem;
+    }
+    .nav-links.active {
+      display: flex;
+    }
+    .hamburger {
+      display: block;
+      cursor: pointer;
+      width: 25px;
+      height: 3px;
+      background: #38bdf8;
+      position: relative;
+    }
+    .hamburger::before, .hamburger::after {
+      content: "";
+      position: absolute;
+      width: 25px;
+      height: 3px;
+      background: #38bdf8;
+      transition: 0.3s;
+    }
+    .hamburger::before { top: -8px; }
+    .hamburger::after { top: 8px; }
+  }
+</style>
+
+<script>
+  // Mobile Hamburger Toggle
+  document.addEventListener("DOMContentLoaded", () => {
+    const navLinks = document.querySelector('.nav-links');
+    const navContainer = document.querySelector('.nav-container');
+
+    // Create hamburger dynamically for mobile
+    const hamburger = document.createElement('div');
+    hamburger.classList.add('hamburger');
+    navContainer.appendChild(hamburger);
+
+    hamburger.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+      hamburger.classList.toggle('toggle');
+    });
+  });
+</script>

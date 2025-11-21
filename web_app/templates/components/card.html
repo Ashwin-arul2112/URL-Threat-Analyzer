@@ -1,0 +1,63 @@
+{% macro card(title, value) %}
+<div class="card">
+  <div class="card-content">
+    <h3>{{ title }}</h3>
+    <p>{{ value }}</p>
+  </div>
+</div>
+
+<style>
+  /* 🌟 Dashboard Card Styling */
+  .card {
+    background: rgba(15, 23, 42, 0.85);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: default;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.4);
+  }
+
+  .card-content h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #38bdf8; /* Cyan accent */
+  }
+
+  .card-content p {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #facc15; /* Gold accent */
+    margin: 0;
+  }
+
+  /* Small responsive tweak */
+  @media (max-width: 768px) {
+    .card {
+      padding: 1rem;
+    }
+    .card-content p {
+      font-size: 1.6rem;
+    }
+  }
+</style>
+
+<script>
+  // Optional card animation script
+  document.addEventListener("DOMContentLoaded", () => {
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, idx) => {
+      setTimeout(() => {
+        card.style.transform = "translateY(0)";
+        card.style.opacity = "1";
+      }, idx * 100);
+    });
+  });
+</script>
+{% endmacro %}

@@ -1,0 +1,387 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<!-- 🌌 Hero Section -->
+<section class="hero">
+  <div class="hero-overlay"></div>
+  <div class="hero-container">
+    <h1>Smart URL Threat Analyzer</h1>
+    <p>Instantly detect and visualize malicious links using <span class="highlight">AI-driven Threat Intelligence</span>.</p>
+
+    <!-- 🔘 Tabs -->
+    <div class="scan-tabs">
+      <button id="mlTab" class="active">AI Scan</button>
+      <button id="liveTab">Live Scan</button>
+      <div class="tab-indicator"></div>
+    </div>
+
+    <!-- 🤖 ML Scan -->
+    <form id="mlScanForm" class="scan-form glass active-form">
+      <div class="form-group">
+        <input type="text" id="urlInput" name="url" placeholder="Enter a URL to analyze..." required />
+      </div>
+      <button type="submit" id="scanButton">Run AI Scan</button>
+    </form>
+
+    <!-- 🌐 Live Scan -->
+    <form id="liveScanForm" class="scan-form glass hidden">
+      <div class="form-group">
+        <input type="text" id="liveUrlInput" name="url" placeholder="Enter a URL for live WHOIS & HTTP analysis..." required />
+      </div>
+      <button type="submit" id="liveScanButton">Run Live Scan</button>
+    </form>
+
+    <!-- 🧠 Result -->
+    <div id="scanResult" class="scan-result hidden"></div>
+  </div>
+</section>
+
+<!-- 🧾 Recent Scans -->
+{% if recent_scans %}
+<section class="recent-scans glass fade-in">
+  <h2>Recent AI Scans</h2>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>URL</th>
+          <th>Result</th>
+          <th>Report</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for scan in recent_scans %}
+        <tr>
+          <td class="url">{{ scan.url }}</td>
+          <td class="{{ 'safe' if scan.result == 'safe' else 'risky' }}">{{ scan.result.upper() }}</td>
+          <td>
+            <a href="{{ url_for('report_view', scan_id=scan._id|string) }}" class="btn">View</a>
+            <a href="{{ url_for('report_download', scan_id=scan._id|string) }}" class="btn">PDF</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+
+<!-- 🎨 Styles -->
+<style>
+:root {
+  --accent: #38bdf8;
+  --accent2: #818cf8;
+  --safe: #22c55e;
+  --risky: #ef4444;
+  --bg-dark: #0f172a;
+  --text-light: #f8fafc;
+}
+
+/* 🌌 Hero */
+.hero {
+  position: relative;
+  text-align: center;
+  min-height: 90vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+.hero-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at top left, rgba(56,189,248,0.2), rgba(15,23,42,1));
+  z-index: 0;
+}
+.hero-container {
+  z-index: 2;
+  max-width: 700px;
+  padding: 2rem;
+  color: var(--text-light);
+  animation: fadeIn 1s ease-out;
+}
+.hero h1 {
+  font-size: 3rem;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  color: transparent;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+.hero p {
+  color: #cbd5e1;
+  font-size: 1.15rem;
+  margin-bottom: 2rem;
+}
+.highlight {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* 🧠 Tabs */
+.scan-tabs {
+  position: relative;
+  display: inline-flex;
+  background: rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 0.25rem;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+.scan-tabs button {
+  flex: 1;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  background: transparent;
+  color: #e2e8f0;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+.scan-tabs button.active {
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  color: #0f172a;
+  box-shadow: 0 0 10px rgba(56,189,248,0.4);
+}
+.tab-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 6px;
+  transition: transform 0.3s ease;
+}
+
+/* 🔍 Forms */
+.scan-form {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 0 25px rgba(0,0,0,0.4);
+  transition: all 0.4s ease;
+}
+.scan-form input {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  font-size: 1rem;
+  transition: box-shadow 0.3s;
+}
+.scan-form input:focus {
+  box-shadow: 0 0 15px var(--accent);
+  outline: none;
+}
+.scan-form button {
+  margin-top: 1rem;
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  color: #0f172a;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.scan-form button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(56,189,248,0.4);
+}
+
+/* 🧾 Scan Result */
+.scan-result {
+  margin-top: 2rem;
+  padding: 1.3rem;
+  border-radius: 12px;
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.scan-result.safe {
+  background: rgba(34,197,94,0.1);
+  border-left: 5px solid var(--safe);
+  color: #bbf7d0;
+}
+.scan-result.risky {
+  background: rgba(239,68,68,0.1);
+  border-left: 5px solid var(--risky);
+  color: #fecaca;
+}
+
+/* 🕵️‍♂️ Recent Scans */
+.recent-scans {
+  max-width: 950px;
+  margin: 4rem auto;
+  padding: 2rem;
+  border-radius: 18px;
+}
+.recent-scans h2 {
+  text-align: center;
+  color: var(--accent);
+  font-size: 1.7rem;
+  margin-bottom: 1.5rem;
+}
+.table-container { overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+th, td {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+th {
+  color: var(--accent2);
+  font-weight: 600;
+}
+td {
+  color: #e2e8f0;
+}
+.url {
+  max-width: 400px;
+  word-break: break-word;
+}
+.btn {
+  padding: 0.45rem 0.8rem;
+  border-radius: 8px;
+  background: rgba(56,189,248,0.15);
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+.btn:hover {
+  background: rgba(56,189,248,0.3);
+  transform: scale(1.05);
+}
+
+/* ✨ Animations */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.hidden { display: none; }
+.fade-in { animation: fadeIn 1s ease; }
+
+@media (max-width: 768px) {
+  .hero h1 { font-size: 2.3rem; }
+  .scan-form { padding: 1.5rem; }
+  .recent-scans { margin: 2rem auto; padding: 1.2rem; }
+}
+</style>
+
+<!-- ⚙️ JS -->
+<script>
+const mlTab = document.getElementById("mlTab");
+const liveTab = document.getElementById("liveTab");
+const mlForm = document.getElementById("mlScanForm");
+const liveForm = document.getElementById("liveScanForm");
+const tabIndicator = document.querySelector(".tab-indicator");
+
+mlTab.addEventListener("click", () => {
+  mlForm.classList.remove("hidden");
+  liveForm.classList.add("hidden");
+  mlTab.classList.add("active");
+  liveTab.classList.remove("active");
+  tabIndicator.style.transform = "translateX(0%)";
+});
+
+liveTab.addEventListener("click", () => {
+  liveForm.classList.remove("hidden");
+  mlForm.classList.add("hidden");
+  liveTab.classList.add("active");
+  mlTab.classList.remove("active");
+  tabIndicator.style.transform = "translateX(100%)";
+});
+
+// 🧠 ML Scan
+mlForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const url = document.getElementById("urlInput").value.trim();
+  const resultBox = document.getElementById("scanResult");
+  const btn = document.getElementById("scanButton");
+
+  if (!url) return;
+
+  resultBox.classList.remove("hidden", "safe", "risky");
+  resultBox.innerHTML = "⏳ Analyzing with AI model...";
+  btn.disabled = true;
+
+  try {
+    const res = await fetch("/api/scan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    const cls = data.result === "risky" ? "risky" : "safe";
+    resultBox.classList.add(cls);
+    resultBox.innerHTML = `
+      <strong>${data.result.toUpperCase()}</strong> — Confidence: <strong>${data.score}</strong><br>
+      🔗 Final URL: ${data.details.final_url || url}<br>
+      <div style="margin-top:0.8rem;">
+        <a href="/report/view/${data.details._id || ''}" class="btn">View</a>
+        <a href="/report/download/${data.details._id || ''}" class="btn">PDF</a>
+      </div>
+    `;
+  } catch (err) {
+    resultBox.innerHTML = `❌ Error: ${err.message}`;
+    resultBox.classList.add("risky");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// 🌐 Live Scan
+liveForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const url = document.getElementById("liveUrlInput").value.trim();
+  const resultBox = document.getElementById("scanResult");
+  const btn = document.getElementById("liveScanButton");
+
+  if (!url) return;
+
+  resultBox.classList.remove("hidden");
+  resultBox.innerHTML = "🌍 Running WHOIS and HTTP analysis...";
+  btn.disabled = true;
+
+  try {
+    const res = await fetch("/api/live_scan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    const r = data.result;
+
+    resultBox.innerHTML = `
+      ✅ <strong>Live Scan Complete</strong><br>
+      🌐 Domain: ${r.final_domain || 'N/A'}<br>
+      🔢 IP: ${r.ip_address || 'N/A'}<br>
+      ⏱ Response Time: ${r.response_time_sec || 'N/A'} sec<br>
+      🗓 Domain Age: ${r.domain_age_days || 'Unknown'} days<br>
+      <a href="/live_scans" class="btn mt-2">View All Live Scans</a>
+    `;
+    resultBox.classList.add("safe");
+  } catch (err) {
+    resultBox.innerHTML = `❌ Error: ${err.message}`;
+    resultBox.classList.add("risky");
+  } finally {
+    btn.disabled = false;
+  }
+});
+</script>
+
+{% endblock %}
